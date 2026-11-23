@@ -80,6 +80,21 @@ describe('SessionHistoryTelemetryService', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('records an entry of the caller’s own beside the hook entries', async () => {
+    const service = build();
+
+    service.record('CHATBOT_TURN', { reply: 'OK', model: 'deepseek-flash' });
+    await service.flush();
+
+    expect(postedEvents(fetchMock)).toEqual([
+      expect.objectContaining({
+        session_id: SESSION_ID,
+        type: 'CHATBOT_TURN',
+        data: { reply: 'OK', model: 'deepseek-flash' }
+      })
+    ]);
+  });
+
   it('does nothing when flush is called with no buffered entries', async () => {
     const service = build();
 
@@ -140,7 +155,7 @@ describe('SessionHistoryTelemetryService', () => {
 
   it('stands down while a batch is still in flight, then posts what arrived after it', async () => {
     vi.useFakeTimers();
-    let release: (response: Response) => void = () => {};
+    let release: (_response: Response) => void = () => {};
     fetchMock.mockImplementationOnce(
       () =>
         new Promise<Response>((resolve) => {

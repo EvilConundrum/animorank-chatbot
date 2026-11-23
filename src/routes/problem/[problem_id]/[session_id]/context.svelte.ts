@@ -12,6 +12,7 @@ import {
   type TestRunResponse
 } from '$lib/practiceSession/api';
 import type { AddPanelPositionOptions } from 'dockview-core';
+import type { WindowSizing } from '$lib/window/dockviewWindowManager';
 import { Subscribable } from '$lib/utils/subscription';
 import type { ExecutionEvent } from '$lib/testCase/executionHook';
 
@@ -28,8 +29,12 @@ const unsavedMessage = (verb: string) =>
 /** The message a failed attempt should show, for a rejection that isn't an Error. */
 const messageOf = (error: unknown, fallback: string): string => (error instanceof Error ? error.message : fallback);
 
-/** Opens (or focuses) a window in the dockview, optionally placing it. */
-export type OpenWindow = (_key: string, _positions?: AddPanelPositionOptions | AddPanelPositionOptions[]) => void;
+/** Opens (or focuses) a window in the dockview, optionally placing and sizing it. */
+export type OpenWindow = (
+  _key: string,
+  _positions?: AddPanelPositionOptions | AddPanelPositionOptions[],
+  _sizing?: WindowSizing
+) => void;
 
 /** Closes a window in the dockview by key; a key that is not open is a no-op. */
 export type CloseWindow = (_key: string) => void;

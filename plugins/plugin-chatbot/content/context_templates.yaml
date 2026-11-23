@@ -1,0 +1,53 @@
+# Context templates for the chatbot.
+#
+# Every template here is rendered with nunjucks and appended to the system
+# prompt, in the order the keys appear in this file. A template that renders to
+# nothing is left out, so a section can be disabled by emptying it or removing
+# its key.
+#
+# Each template may read:
+#
+#   problem.name          the problem's title
+#   problem.description   the statement, as markdown
+#   problem.starter_code  the starter code, with slot markers removed
+#   problem.language      the problem's language id (e.g. "C")
+#
+#   code.language         the language the student is writing in
+#   code.value            the student's current code, assembled from its slots
+#
+#   test_cases            the problem's PUBLIC test cases only; hidden cases are
+#                         never sent. Each entry has:
+#                           .index  its position in the list, from 1
+#                           .type   the test case type (e.g. "stdio", "function")
+#                           .data   the test case's definition, as stored
+#
+# The `tojson` filter prints a value as JSON, e.g. {{ test_cases | tojson }}.
+
+problem: |
+  ## Problem
+
+  **{{ problem.name }}**
+
+  {{ problem.description }}
+
+code: |
+  ## The student's current code ({{ code.language }})
+
+  ```{{ code.language | lower }}
+  {{ code.value }}
+  ```
+
+test_cases: |
+  ## Public test cases
+
+  {% if test_cases.length %}
+  {% for test in test_cases %}
+  ### Test case {{ test.index }} ({{ test.type }})
+
+  ```json
+  {{ test.data | tojson }}
+  ```
+  {% endfor %}
+  {% else %}
+  This problem has no public test cases.
+  {% endif %}

@@ -1,0 +1,9 @@
+{
+  "id": "chatbot",
+  "manifestVersion": "0",
+  "name": "Chatbot",
+  "author": "AnimoRank",
+  "version": "1.0.0",
+  "description": "A chat window beside the problem: the model sees the statement, the student's code and the public test cases.",
+  "category": ["tutor"]
+}

@@ -28,13 +28,28 @@ export interface DockviewWindowManagerOptions {
 }
 
 /**
- * Opens (or focuses) a window in the dockview, optionally placing it. The
- * window type is erased on purpose: a page context hands this to plugins, which
- * have no business knowing the windows of the page they run on.
+ * Size hints for a window's first placement. Dockview applies them when the
+ * panel is created; a panel that is already open keeps the size the user gave
+ * it. A caller that wants the hint applied again closes the panel first.
+ */
+export interface WindowSizing {
+  initialWidth?: number;
+  initialHeight?: number;
+  minimumWidth?: number;
+  maximumWidth?: number;
+  minimumHeight?: number;
+  maximumHeight?: number;
+}
+
+/**
+ * Opens (or focuses) a window in the dockview, optionally placing it and sizing
+ * it. The window type is erased on purpose: a page context hands this to
+ * plugins, which have no business knowing the windows of the page they run on.
  */
 export type OpenWindow = (
   _key: string,
-  _positions?: AddPanelPositionOptions | AddPanelPositionOptions[]
+  _positions?: AddPanelPositionOptions | AddPanelPositionOptions[],
+  _sizing?: WindowSizing
 ) => Promise<unknown>;
 
 /**
@@ -152,11 +167,13 @@ export class DockviewWindowManager<T> {
    * Open the window, focusing it when it is already open. When it needs to be
    * created, `positions` (a single position or a list of candidates) places
    * the panel relative to an existing panel or group; the first candidate
-   * whose reference is open is used.
+   * whose reference is open is used. `sizing` applies only to that creation:
+   * an open panel keeps the size the user gave it.
    */
   public async openWindow(
     key: string,
-    positions?: AddPanelPositionOptions | AddPanelPositionOptions[]
+    positions?: AddPanelPositionOptions | AddPanelPositionOptions[],
+    sizing?: WindowSizing
   ): Promise<Window<T>> {
     const window = await this.ensureWindow(key);
     const panel = this.dockview?.getPanel(key);
@@ -168,7 +185,8 @@ export class DockviewWindowManager<T> {
         id: key,
         title: window.title,
         component: 'default',
-        ...(position !== undefined ? { position } : {})
+        ...(position !== undefined ? { position } : {}),
+        ...sizing
       });
       // Positioned additions are not activated by dockview; focus the panel.
       this.dockview?.getPanel(key)?.api.setActive();
